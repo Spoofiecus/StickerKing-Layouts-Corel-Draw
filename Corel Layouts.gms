@@ -1,11 +1,4 @@
-' Main Subroutine to be called from CorelDRAW
-Sub StickerKingLayoutGenerator()
-    ' This subroutine now acts as a launcher for the main logic
-    CreateStickerLayout
-End Sub
-
-' The main logic for creating the sticker layout
-Private Sub CreateStickerLayout()
+Public Sub CreateStickerLayout()
     ' Set the document units to millimeters (mm)
     ActiveDocument.Unit = cdrMillimeter
 
@@ -166,6 +159,7 @@ End Sub
 '#################################################################
 '# UserForm Definition: frmLayoutOptions
 '# This section defines the visual form and its properties.
+'# It must be written in this specific format to be loaded by VBA.
 '#################################################################
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmLayoutOptions

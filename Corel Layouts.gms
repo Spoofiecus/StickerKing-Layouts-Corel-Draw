@@ -8,7 +8,8 @@ Public Sub CreateStickerLayout()
         Exit Sub
     End If
 
-    ' --- Show the UserForm to get settings ---
+    ' --- Show a dummy UserForm to test if it loads ---
+    ' This is a temporary debugging step.
     Dim frm As New frmLayoutOptions
     frm.Show
 
@@ -17,29 +18,29 @@ Public Sub CreateStickerLayout()
         Unload frm
         Exit Sub
     End If
+    Unload frm ' Unload the dummy form immediately
 
-    ' --- Get settings from the form ---
+    ' --- Get settings from InputBox prompts (temporary) ---
     Dim totalStickers As Long
-    totalStickers = frm.TotalStickers
+    totalStickers = CLng(InputBox("Enter the total number of stickers needed:", "Total Stickers", 10))
 
     Dim stickersPerRow As Long
-    stickersPerRow = frm.StickersPerRow
+    stickersPerRow = CLng(InputBox("Enter the number of stickers per row:", "Stickers Per Row", 5))
 
     Dim spacingY As Double
-    spacingY = frm.VerticalSpacing
+    spacingY = CDbl(InputBox("Enter the spacing between rows (vertical spacing):", "Vertical Spacing", 0.5))
 
     Dim marginTop As Double
-    marginTop = frm.MarginTop
+    marginTop = CDbl(InputBox("Enter the Top Margin (mm):", "Page Margins", 0))
 
     Dim marginLeft As Double
-    marginLeft = frm.MarginLeft
+    marginLeft = CDbl(InputBox("Enter the Left Margin (mm):", "Page Margins", 0))
 
     Dim allowRotation As Boolean
-    allowRotation = frm.AllowRotation
+    allowRotation = (MsgBox("Allow shapes to be rotated to fit better?", vbYesNo, "Allow Rotation") = vbYes)
 
     Dim optimizeLines As Boolean
-    optimizeLines = frm.OptimizeSharedLines
-
+    optimizeLines = (MsgBox("Optimize shared cut lines (Combine)?", vbYesNo, "Optimize Lines") = vbYes)
     ' --- End of settings gathering ---
 
 
@@ -54,20 +55,17 @@ Public Sub CreateStickerLayout()
     ' --- Rotation Logic ---
     Dim shapeIsRotated As Boolean
     shapeIsRotated = False
-    If allowRotation And stickerHeight > 0 And stickerWidth > 0 Then ' Avoid division by zero and pointless rotation of squares
-        ' Calculate spacing for both orientations to see which is better
+    If allowRotation And stickerHeight > 0 And stickerWidth > 0 Then
         Dim availableWidth As Double
         availableWidth = ActivePage.SizeWidth - marginLeft
 
-        ' Spacing if not rotated
         Dim spacingX_normal As Double
         If stickersPerRow > 1 Then
             spacingX_normal = (availableWidth - (stickersPerRow * stickerWidth)) / (stickersPerRow - 1)
         Else
-            spacingX_normal = 0 ' Or handle as a special case
+            spacingX_normal = 0
         End If
 
-        ' Spacing if rotated
         Dim spacingX_rotated As Double
         If stickersPerRow > 1 Then
             spacingX_rotated = (availableWidth - (stickersPerRow * stickerHeight)) / (stickersPerRow - 1)
@@ -75,7 +73,6 @@ Public Sub CreateStickerLayout()
             spacingX_rotated = 0
         End If
 
-        ' If rotating gives better spacing (and the rotated shapes actually fit)
         If spacingX_rotated > spacingX_normal And spacingX_rotated >= 0 Then
             Dim temp As Double
             temp = stickerWidth
@@ -93,10 +90,9 @@ Public Sub CreateStickerLayout()
     ' Calculate automatic horizontal spacing
     Dim spacingX As Double
     spacingX = (pageWidth - marginLeft - (stickersPerRow * stickerWidth)) / (stickersPerRow - 1)
-    If spacingX < 0 Then spacingX = 0 ' Ensure no negative spacing
+    If spacingX < 0 Then spacingX = 0
 
     ' Position variables
-    ' The start position is now offset by the margins
     Dim startX As Double
     Dim startY As Double
     startX = ActivePage.LeftX + marginLeft
@@ -112,7 +108,6 @@ Public Sub CreateStickerLayout()
     stickerCount = 0
 
     Do While stickerCount < totalStickers
-        ' Check if the next sticker will exceed the number per row
         If colCounter >= stickersPerRow Then
             rowCounter = rowCounter + 1
             colCounter = 0
@@ -128,12 +123,10 @@ Public Sub CreateStickerLayout()
                                        startY - rowCounter * (stickerHeight + spacingY)
         End If
 
-        ' Apply rotation if the logic determined it was more efficient
         If shapeIsRotated Then
             duplicateShape.Rotate 90
         End If
 
-        ' Add the new shape to our collection for later processing
         If createdShapes Is Nothing Then
             Set createdShapes = duplicateShape
         Else
@@ -146,229 +139,52 @@ Public Sub CreateStickerLayout()
 
     ' --- Combine Shapes Logic ---
     If optimizeLines And Not createdShapes Is Nothing Then
-        ' This single command merges all shapes in the range, optimizing shared paths
         createdShapes.Combine
     End If
     ' --- End Combine Shapes Logic ---
 
-    Unload frm ' Unload the form from memory
-    MsgBox "Stickers created successfully in a boustrophedon layout!", vbInformation, "Success"
+    MsgBox "Stickers created successfully!", vbInformation, "Success"
 End Sub
 
 
 '#################################################################
 '# UserForm Definition: frmLayoutOptions
-'# This section defines the visual form and its properties.
-'# It must be written in this specific format to be loaded by VBA.
+'# This is a simplified version for debugging purposes.
 '#################################################################
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmLayoutOptions
-   Caption         =   "StickerKing Layout Options"
-   ClientHeight    =   6600
+   Caption         =   "StickerKing Layout"
+   ClientHeight    =   1500
    ClientLeft      =   60
    ClientTop       =   345
-   ClientWidth     =   3400
+   ClientWidth     =   3000
    StartUpPosition =   1  'CenterOwner
    Begin VB.CommandButton btnCancel
       Caption         =   "Cancel"
       Height          =   375
-      Left            =   1800
-      TabIndex        =   8
-      Top             =   6000
+      Left            =   1680
+      TabIndex        =   1
+      Top             =   960
       Width           =   1215
    End
    Begin VB.CommandButton btnOK
-      Caption         =   "OK"
+      Caption         =   "Continue"
       Height          =   375
-      Left            =   360
-      TabIndex        =   7
-      Top             =   6000
+      Left            =   120
+      TabIndex        =   0
+      Top             =   960
       Width           =   1215
-   End
-   Begin VB.CheckBox chkOptimizeLines
-      Caption         =   "Optimize Shared Lines (Combine)"
-      Height          =   375
-      Left            =   240
-      TabIndex        =   6
-      Top             =   5400
-      Width           =   2895
-   End
-   Begin VB.CheckBox chkAllowRotation
-      Caption         =   "Rotate shapes to fit"
-      Height          =   375
-      Left            =   240
-      TabIndex        =   5
-      Top             =   4800
-      Width           =   2895
-   End
-   Begin VB.Frame fraMargins
-      Caption         =   "Page Margins (mm)"
-      Height          =   1575
-      Left            =   240
-      TabIndex        =   9
-      Top             =   3000
-      Width           =   2895
-      Begin VB.TextBox txtMarginLeft
-         Height          =   285
-         Left            =   1560
-         TabIndex        =   4
-         Top             =   960
-         Width           =   1095
-      End
-      Begin VB.TextBox txtMarginTop
-         Height          =   285
-         Left            =   1560
-         TabIndex        =   3
-         Top             =   480
-         Width           =   1095
-      End
-      Begin VB.Label lblMarginLeft
-         Caption         =   "Left Margin:"
-         Height          =   255
-         Left            =   240
-         TabIndex        =   12
-         Top             =   960
-         Width           =   1215
-      End
-      Begin VB.Label lblMarginTop
-         Caption         =   "Top Margin:"
-         Height          =   255
-         Left            =   240
-         TabIndex        =   11
-         Top             =   480
-         Width           =   1215
-      End
-   End
-   Begin VB.Frame fraLayout
-      Caption         =   "Layout Settings"
-      Height          =   2535
-      Left            =   240
-      TabIndex        =   10
-      Top             =   240
-      Width           =   2895
-      Begin VB.TextBox txtVerticalSpacing
-         Height          =   285
-         Left            =   1560
-         TabIndex        =   2
-         Top             =   1920
-         Width           =   1095
-      End
-      Begin VB.TextBox txtStickersPerRow
-         Height          =   285
-         Left            =   1560
-         TabIndex        =   1
-         Top             =   1200
-         Width           =   1095
-      End
-      Begin VB.TextBox txtTotalStickers
-         Height          =   285
-         Left            =   1560
-         TabIndex        =   0
-         Top             =   480
-         Width           =   1095
-      End
-      Begin VB.Label lblVerticalSpacing
-         Caption         =   "Vertical Spacing:"
-         Height          =   255
-         Left            =   240
-         TabIndex        =   13
-         Top             =   1920
-         Width           =   1215
-      End
-      Begin VB.Label lblStickersPerRow
-         Caption         =   "Stickers Per Row:"
-         Height          =   255
-         Left            =   240
-         TabIndex        =   14
-         Top             =   1200
-         Width           =   1335
-      End
-      Begin VB.Label lblTotalStickers
-         Caption         =   "Total Stickers:"
-         Height          =   255
-         Left            =   240
-         TabIndex        =   15
-         Top             =   480
-         Width           =   1215
-      End
    End
 End
 '#################################################################
 '# UserForm Code-Behind: frmLayoutOptions
-'# This section contains the VBA code that runs behind the form.
 '#################################################################
 
 Option Explicit
 
-' Public property to signal if the user cancelled
 Public Cancelled As Boolean
 
-' --- Public Properties to expose settings ---
-
-Public Property Get TotalStickers() As Long
-    TotalStickers = CLng(txtTotalStickers.Text)
-End Property
-
-Public Property Get StickersPerRow() As Long
-    StickersPerRow = CLng(txtStickersPerRow.Text)
-End Property
-
-Public Property Get VerticalSpacing() As Double
-    VerticalSpacing = CDbl(txtVerticalSpacing.Text)
-End Property
-
-Public Property Get MarginTop() As Double
-    MarginTop = CDbl(txtMarginTop.Text)
-End Property
-
-Public Property Get MarginLeft() As Double
-    MarginLeft = CDbl(txtMarginLeft.Text)
-End Property
-
-Public Property Get AllowRotation() As Boolean
-    AllowRotation = chkAllowRotation.Value
-End Property
-
-Public Property Get OptimizeSharedLines() As Boolean
-    OptimizeSharedLines = chkOptimizeLines.Value
-End Property
-
-
-' --- Form Control Event Handlers ---
-
 Private Sub btnOK_Click()
-    ' --- Validate all inputs before closing the form ---
-    If Not IsNumeric(txtTotalStickers.Text) Or CLng(txtTotalStickers.Text) <= 0 Then
-        MsgBox "Please enter a valid positive number for Total Stickers.", vbExclamation, "Invalid Input"
-        txtTotalStickers.SetFocus
-        Exit Sub
-    End If
-
-    If Not IsNumeric(txtStickersPerRow.Text) Or CLng(txtStickersPerRow.Text) <= 0 Then
-        MsgBox "Please enter a valid positive number for Stickers Per Row.", vbExclamation, "Invalid Input"
-        txtStickersPerRow.SetFocus
-        Exit Sub
-    End If
-
-    If Not IsNumeric(txtVerticalSpacing.Text) Or CDbl(txtVerticalSpacing.Text) < 0 Then
-        MsgBox "Please enter a non-negative number for Vertical Spacing.", vbExclamation, "Invalid Input"
-        txtVerticalSpacing.SetFocus
-        Exit Sub
-    End If
-
-    If Not IsNumeric(txtMarginTop.Text) Or CDbl(txtMarginTop.Text) < 0 Then
-        MsgBox "Please enter a non-negative number for Top Margin.", vbExclamation, "Invalid Input"
-        txtMarginTop.SetFocus
-        Exit Sub
-    End If
-
-    If Not IsNumeric(txtMarginLeft.Text) Or CDbl(txtMarginLeft.Text) < 0 Then
-        MsgBox "Please enter a non-negative number for Left Margin.", vbExclamation, "Invalid Input"
-        txtMarginLeft.SetFocus
-        Exit Sub
-    End If
-
-    ' If all validation passes, hide the form to return to the main sub
     Me.Hide
 End Sub
 
@@ -378,21 +194,10 @@ Private Sub btnCancel_Click()
 End Sub
 
 Private Sub UserForm_Initialize()
-    ' Set the default value for the Cancelled flag
     Cancelled = False
-
-    ' Populate textboxes with default values
-    txtTotalStickers.Text = "10"
-    txtStickersPerRow.Text = "5"
-    txtVerticalSpacing.Text = "0.5"
-    txtMarginTop.Text = "0"
-    txtMarginLeft.Text = "0"
-    chkAllowRotation.Value = False
-    chkOptimizeLines.Value = False
 End Sub
 
 Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
-    ' If the user clicks the "X" button, treat it as a cancellation
     If CloseMode = vbFormControlMenu Then
         Cancelled = True
         Unload Me

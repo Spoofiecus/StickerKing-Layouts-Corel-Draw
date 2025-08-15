@@ -73,15 +73,22 @@ Sub CreateStickerLayout()
 
         ' Create a duplicate of the first shape
         Set duplicateShape = baseShape.Duplicate
-        duplicateShape.SetPosition startX + colCounter * (stickerWidth + spacingX), _
-                                   startY - rowCounter * (stickerHeight + spacingY)
+
+        ' Check if the current row is even or odd for boustrophedon layout
+        If (rowCounter Mod 2) = 0 Then
+            ' Even row: left-to-right
+            duplicateShape.SetPosition startX + colCounter * (stickerWidth + spacingX), _
+                                       startY - rowCounter * (stickerHeight + spacingY)
+        Else
+            ' Odd row: right-to-left
+            duplicateShape.SetPosition startX + (stickersPerRow - 1 - colCounter) * (stickerWidth + spacingX), _
+                                       startY - rowCounter * (stickerHeight + spacingY)
+        End If
 
         ' Update column counter and sticker count
         colCounter = colCounter + 1
         stickerCount = stickerCount + 1
     Loop
 
-    MsgBox "Stickers created successfully in a grid layout!", vbInformation, "Success"
+    MsgBox "Stickers created successfully in a boustrophedon layout!", vbInformation, "Success"
 End Sub
-
-

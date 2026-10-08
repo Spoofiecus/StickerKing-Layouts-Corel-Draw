@@ -2,17 +2,18 @@
 
 Branch: `cline/6n34nwxf`. This is a read-only audit of the **actual GitHub state**, re-derived because the prior session's work is not present on GitHub (see §0).
 
-## 0. Critical: the archived "monorepo" work is NOT on GitHub
+## 0. IMPORTANT correction: the archived work IS on a PRIVATE repo I cannot access
 
-The previous conversation described a monorepo with 5 products and claimed commits pushed to branch `cline/sq349hc2`, plus reports `AUDIT-FEEDBACK.md`, `FULL-AUDIT-REPORT.md`, `RECOMMENDATIONS.md`. **None of it exists.**
+**Correction (supersedes the original §0):** the previous session's work was pushed to a **private** repo:
+`Spoofiecus/Sticker-King---Scripts-extentions-and-apps` (branch `cline/sq349hc2`). It is NOT lost.
 
-Verified ABSENT across all 22 repos of `Spoofiecus` (every branch):
-- branch `cline/sq349hc2` (no `cline/*` branch on any sticker repo)
-- `AUDIT-FEEDBACK.md`, `FULL-AUDIT-REPORT.md`, `RECOMMENDATIONS.md`
-- the **Canva PDF Fixer** (`canva-to-cdr-local`), the **Order Form Creator** / "Label Sheet Creator"
-- `fabric.min.js`, `pypdf` / `requirements.txt`, `Lable/Label Price Test.csv`, `Printing Info.txt`, `Lables-*.txt`, the extracted `*.bas` source
+This sandbox authenticates as a GitHub App (`cline-cloud[bot]`) whose installation covers **only**
+`Spoofiecus/StickerKing-Layouts-Corel-Draw` (`gh api /installation/repositories` returns exactly that one repo).
+The other Sticker King repos are visible only because they are **public**. The private
+`Sticker-King---Scripts-extentions-and-apps` repo therefore returns **404** here (`gh`, `git ls-remote`).
 
-=> That session's work lived in a sandbox that was never pushed (or a different environment) and is lost. Everything below is re-derived from the real repos.
+=> To continue that work, the app needs access to that repo (grant the Cline GitHub App access to it, or make it public).
+Everything below is still a valid audit of the PUBLIC repos; it does not replace the private repo's contents.
 
 ## 1. What actually exists (9 sticker repos, no monorepo)
 
